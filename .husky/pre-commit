@@ -1,0 +1,8 @@
+# Lint only what is staged (fast), then check the project as a whole — types and
+# tests both break across file boundaries, so per-file checks would miss it.
+pnpm lint-staged
+pnpm typecheck
+pnpm test
+
+# E2E is deliberately not here: `pnpm test:e2e` runs a full production build and
+# a browser, which is minutes per commit. Run it before pushing or in CI.

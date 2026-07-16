@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/bin/harness-cli.exe init *)",
+      "Bash(echo \"EXIT_INIT=$?\")",
+      "Bash(./scripts/bin/harness-cli.exe migrate *)",
+      "Bash(echo \"EXIT_MIGRATE=$?\")",
+      "Bash(npm -v)",
+      "Bash(pnpm -v)",
+      "Bash(corepack --version)",
+      "Bash(rm -rf .scaffold-tmp)",
+      "Bash(pnpm create *)",
+      "Bash(rm -rf scaffold_tmp)",
+      "Bash(mv eslint.config.mjs next-env.d.ts next.config.ts package.json pnpm-workspace.yaml postcss.config.mjs tsconfig.json public src /d/workspace/apply-flow/ && echo \"moved\"; ls /d/workspace/apply-flow)",
+      "PowerShell($env:HARNESS_RUN_ID = \"apply-flow-scaffold-2026-07-15\"; & \"d:\\\\workspace\\\\apply-flow\\\\scripts\\\\bin\\\\harness-cli.exe\" query matrix --active --summary 2>&1; echo \"=== intakes ===\"; & \"d:\\\\workspace\\\\apply-flow\\\\scripts\\\\bin\\\\harness-cli.exe\" query intakes 2>&1 | Select-Object -First 20)",
+      "PowerShell(& \"d:\\\\workspace\\\\apply-flow\\\\scripts\\\\bin\\\\harness-cli.exe\" intake --help 2>&1)",
+      "PowerShell(& \"d:\\\\workspace\\\\apply-flow\\\\scripts\\\\bin\\\\harness-cli.exe\" story add --help 2>&1)",
+      "PowerShell(& \"d:\\\\workspace\\\\apply-flow\\\\scripts\\\\bin\\\\harness-cli.exe\" decision add --help 2>&1)"
+    ],
+    "additionalDirectories": [
+      "D:\\workspace\\apply-flow\\scaffold_tmp"
+    ]
+  }
+}

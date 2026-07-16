@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm test *)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm typecheck *)",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(pkill -f \"next start\")",
+      "Bash(pnpm test:e2e)"
+    ]
+  }
+}
