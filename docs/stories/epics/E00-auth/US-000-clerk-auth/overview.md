@@ -2,12 +2,17 @@
 
 ## Trạng thái
 
-planned
+in_progress — code đã xong và có proof unit/integration; **chờ key Clerk để chạy
+E2E** rồi mới `story complete`.
 
 ## Current Behavior (hiện trạng)
 
-Chưa có mã ứng dụng. Chưa có xác thực, chưa có bản ghi `User`, chưa có màn hình
-nào được bảo vệ.
+Đã có: Postgres cục bộ qua Docker, Prisma model `User` + migration đầu tiên,
+`EnsureLocalUser` (đồng bộ lười, idempotent), `getCurrentUser`/`requireCurrentUser`,
+Clerk provider + form đăng nhập/đăng ký, bảo vệ route qua `src/proxy.ts`, và
+`/dashboard` tối thiểu làm điểm đồng bộ.
+
+Chưa có: key Clerk thật trong `.env`, nên luồng đăng nhập chưa chạy end-to-end.
 
 ## Target Behavior (mục tiêu)
 

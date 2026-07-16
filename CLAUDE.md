@@ -65,11 +65,22 @@ Priority: nail a smooth application-management experience **before** any AI.
 
 ## 2. Current repository state
 
-There is **no application code yet**. The repo currently contains only the
-`repository-harness` — a repository-level operating harness for coding agents
-(agent-facing docs in `docs/`, automation in `scripts/`, and a prebuilt Rust
-CLI at `scripts/bin/harness-cli.exe`). Product code, stack folders, and tests
-appear only after a spec passes through intake.
+Alongside the `repository-harness` — a repository-level operating harness for
+coding agents (agent-facing docs in `docs/`, automation in `scripts/`, and a
+prebuilt Rust CLI at `scripts/bin/harness-cli.exe`) — the repo now holds a real
+Next.js application:
+
+- `src/app/**` — routes (Landing, Sign-in, Sign-up, Dashboard) and `proxy.ts`,
+  the Next.js 16 name for what used to be `middleware.ts`.
+- `src/features/**` — feature-sliced product code; see `src/features/README.md`.
+- `src/lib/**` — shared infrastructure: Prisma client, zod-parsed env, i18n,
+  providers.
+- `prisma/**` — schema and migrations (Postgres; Neon in production).
+- `tests/**` — three Vitest projects (`unit`, `integration`, `db`) plus
+  Playwright e2e.
+- `docker-compose.yml` — local Postgres for development and the `db` tests.
+
+New stack folders still appear only when a story enters implementation.
 
 Mental model the harness enforces: *the app is what users touch; the harness is
 what agents touch.* Before changing anything, the harness answers: what to read
@@ -172,11 +183,11 @@ Command semantics that are easy to get wrong:
 
 ### This machine
 
-The prebuilt `harness-cli.exe` is currently **blocked by a Windows Application
-Control policy** on this host (fails with "An Application Control policy has
-blocked this file"). Until that is resolved, CLI commands will not run here; work
-that depends on the durable layer must account for this rather than assume the
-binary executes.
+`scripts/bin/harness-cli.exe` runs normally here (verified `harness-cli 0.1.17`).
+An earlier revision of this file said it was blocked by a Windows Application
+Control policy; that is no longer true, and the note was removed rather than
+left to mislead. Run `.\scripts\bootstrap-harness.ps1` first — it fetches the
+binary and initializes `harness.db`.
 
 ---
 
