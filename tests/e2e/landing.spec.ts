@@ -81,13 +81,25 @@ test.describe("Theme", () => {
 });
 
 test.describe("Auth screens", () => {
-  // US-001 ships the shell only; Clerk owns credentials (decision 0008).
-  for (const path of ["/sign-in", "/sign-up"]) {
-    test(`asks for no credentials on ${path}`, async ({ page }) => {
+  // These asserted zero inputs while US-001 shipped the shell alone. US-000
+  // mounted Clerk's form, so the pages now do render inputs — the assertion kept
+  // passing only by racing Clerk's client-side render, which made it a false
+  // green rather than proof.
+  //
+  // The rule it was reaching for — our own shell collects no credentials
+  // (decision 0008) — is enforced where it can be enforced honestly:
+  // tests/integration/auth-shell.test.tsx renders AuthShell in isolation. What
+  // is left for e2e is that Clerk's form actually mounts.
+  for (const [path, ownField] of [
+    ["/sign-in", "identifier"],
+    ["/sign-up", "emailAddress"],
+  ]) {
+    test(`mounts Clerk's form on ${path}`, async ({ page }) => {
       await page.goto(path);
 
-      await expect(page.locator("input")).toHaveCount(0);
-      await expect(page.locator("form")).toHaveCount(0);
+      await expect(page.locator(`input[name="${ownField}"]`)).toBeVisible();
+      // Every input on the page is Clerk's. Ours would have neither name.
+      await expect(page.locator('input:not([name="identifier"]):not([name="emailAddress"]):not([name="password"])')).toHaveCount(0);
     });
   }
 });

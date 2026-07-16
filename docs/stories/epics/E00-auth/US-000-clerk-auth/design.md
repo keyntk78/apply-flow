@@ -29,10 +29,25 @@
 ## Data Model (mô hình dữ liệu)
 
 - Prisma model `User` trên Neon PostgreSQL, khớp SPEC §9.
-- Chỉ mục duy nhất trên `clerkUserId` (và `email`).
-- Migration đầu tiên tạo bảng `User`. Bảng `Application` để cho epic E01 (có thể
-  tạo cùng migration khởi tạo nếu thuận tiện, nhưng hành vi của nó nằm ngoài
-  story này).
+- Chỉ mục **duy nhất trên `clerkUserId`** — đây là khóa danh tính, và là cột mà
+  `EnsureLocalUser` upsert lên.
+- `email` chỉ có **chỉ mục thường, không unique**. Bản trước của tài liệu này ghi
+  unique cho cả hai; đã đổi khi triển khai. Lý do: `email` là bản sao đồng bộ từ
+  Clerk chứ không phải khóa danh tính. Clerk đã đảm bảo duy nhất phía nó, còn ràng
+  buộc unique cục bộ sẽ biến một lần đổi email trên Clerk (hoặc hai identity cùng
+  địa chỉ chưa được link) thành lỗi P2002 **chặn đăng nhập** — tức để ràng buộc DB
+  làm hỏng luồng auth.
+- `fullName` / `avatarUrl` nullable: Clerk không bắt buộc có tên hay ảnh; đăng ký
+  bằng email không tên là luồng phổ biến, không phải ngoại lệ.
+- Migration đầu tiên chỉ tạo bảng `User`. Bảng `Application` để cho epic E01.
+
+Ghi chú phiên bản (Prisma 7, khác với giả định lúc viết design):
+
+- URL datasource nằm ở `prisma.config.ts`, không còn `url = env("DATABASE_URL")`
+  trong schema. Config **không có `directUrl`** — khi migrate lên Neon phải trỏ
+  `DATABASE_URL` vào connection string *unpooled*.
+- Prisma 7 bắt buộc driver adapter (`@prisma/adapter-pg`); không còn engine gói sẵn.
+- Type sinh ra tên là `UserModel`, không phải `User`.
 
 ## UI / Platform Impact
 
@@ -49,9 +64,9 @@
 
 ## Alternatives Considered (phương án đã cân nhắc)
 
-1. **Đồng bộ lười khi request đầu tiên** (khuyến nghị MVP): đơn giản, không cần
-   cấu hình webhook/endpoint công khai; đánh đổi là dữ liệu profile chỉ cập nhật
-   khi user quay lại app.
+1. **Đồng bộ lười khi request đầu tiên** (✅ đã chọn và triển khai): đơn giản,
+   không cần cấu hình webhook/endpoint công khai; đánh đổi là dữ liệu profile chỉ
+   cập nhật khi user quay lại app.
 2. **Webhook Clerk**: dữ liệu luôn mới, nhưng thêm endpoint công khai + xác minh
    chữ ký + cấu hình secret. Cân nhắc nếu cần đồng bộ tức thời.
 3. **Không có bảng User cục bộ, chỉ dùng `clerkUserId` trực tiếp**: loại bỏ vì

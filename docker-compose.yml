@@ -1,0 +1,41 @@
+# Local development database.
+#
+# This is plain Postgres, not Neon. Neon Local (`neondatabase/neon_local`) is a
+# proxy that provisions ephemeral branches against a real Neon cloud project, so
+# it needs NEON_API_KEY + NEON_PROJECT_ID and network access. Neon runs stock
+# Postgres under its own storage layer, so for the User model in this story the
+# wire protocol Prisma talks to is identical. Neon cloud stays the production and
+# preview database; this container is only so `pnpm dev` and integration tests
+# work offline.
+#
+#   docker compose up -d      start
+#   docker compose down       stop (data survives)
+#   docker compose down -v    stop and wipe the volume
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: apply-flow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: applyflow
+      POSTGRES_PASSWORD: applyflow
+      POSTGRES_DB: applyflow
+    ports:
+      # Host port is configurable because 5432 is often taken by a native
+      # Postgres install; the container always listens on 5432 internally.
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # Integration tests and migrations connect the moment the port opens, but
+      # Postgres opens it once before its own init scripts restart the server.
+      # pg_isready is what makes `depends_on: service_healthy` mean "ready".
+      test: ["CMD-SHELL", "pg_isready -U applyflow -d applyflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

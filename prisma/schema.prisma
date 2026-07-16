@@ -1,0 +1,39 @@
+// Data model — Apply Flow. Fields mirror SPEC.md §9.
+// The datasource URL lives in prisma.config.ts (Prisma 7 moved it out of here).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// A local mirror of a Clerk identity.
+///
+/// Clerk owns credentials and sessions (docs/decisions/0008-clerk-authentication.md);
+/// this row exists so Application can hang off a stable foreign key (epic E01)
+/// and so the app can query "my jobs" without calling Clerk.
+model User {
+  id String @id @default(cuid())
+
+  /// The identity key. EnsureLocalUser upserts on this, which is what makes the
+  /// sync idempotent.
+  clerkUserId String @unique
+
+  /// Synced copy of the Clerk email, deliberately NOT unique: Clerk already
+  /// enforces uniqueness on its side, and a unique constraint here would turn an
+  /// email change in Clerk into a P2002 that blocks sign-in. Indexed for lookup.
+  email String
+
+  /// Nullable because Clerk does not require a name or picture — an email
+  /// sign-up with neither is the common path, not an edge case.
+  fullName  String?
+  avatarUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
